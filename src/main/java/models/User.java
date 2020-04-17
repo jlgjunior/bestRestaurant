@@ -68,6 +68,10 @@ public class User {
 				return this.id == other.id;
 		}
 	}
+	
+	public void addVote(Vote vote) {
+		this.votes.add(vote);
+	}
 
 	public static User getUserByDoc(String document) {
 		return User.users.get(document);

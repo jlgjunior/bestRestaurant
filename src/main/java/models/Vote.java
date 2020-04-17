@@ -71,6 +71,10 @@ public class Vote implements Comparable<Vote> {
 		else
 			return -1;
 	}
+	
+	public static void addVote(Vote vote) {
+		Vote.votes.add(vote);
+	}
 
 	@Override
 	public int hashCode() {
@@ -93,23 +97,23 @@ public class Vote implements Comparable<Vote> {
 		else{
 			Vote other = (Vote) obj;
 		
-			if (date == null) {
+			if (this.date == null) {
 				if (other.date != null)
 					return false;
 				else
 					return true;
 			} 
-			else if (!date.equals(other.date))
+			else if (!this.date.equals(other.date))
 				return false;
-			else if (restaurant == null) {
+			else if (this.restaurant == null) {
 				return false;
 			} 
-			else if (!restaurant.equals(other.restaurant))
+			else if (!this.restaurant.equals(other.restaurant))
 				return false;
-			else if (user == null) {
+			else if (this.user == null) {
 				return false;
 			}
-			else if (!user.equals(other.user))
+			else if (!this.user.equals(other.user))
 				return false;
 			else
 				return true;
