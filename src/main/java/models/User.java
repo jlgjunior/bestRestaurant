@@ -30,7 +30,7 @@ public class User {
 		this.name = name;
 		this.password = password;
 		this.votes = new ArrayList<Vote>();
-s	}
+	}
 	
 	public Integer getId() {
 		incId++;
