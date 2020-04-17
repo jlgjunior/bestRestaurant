@@ -19,18 +19,17 @@ public class Vote implements Comparable<Vote> {
 	    }
 	};
 	private static Integer incId = 0;
-
+	
 	private Integer id;
 	private Restaurant restaurant;
 	private User user;
 	private Date date;
 	
-	public Vote(Restaurant restaurant, User user) {
+	public Vote(Restaurant restaurant, User user, Date date) {
 		this.id = getId();
 		this.restaurant = restaurant;
 		this.user = user;
-		this.date = DateUtils.truncate(new Date(), Calendar.DATE);
-		votes.add(this);
+		this.date = date;
 	}
 
 	private Integer getId() {
@@ -43,16 +42,16 @@ public class Vote implements Comparable<Vote> {
 		votes.remove(this);
 	}
 	
-	public static ArrayList<Vote> todayVotes(){
+	public static ArrayList<Vote> getVotesByDate(Date date){
 		Iterator<Vote> it = Vote.votes.iterator();
 		ArrayList<Vote> votes = new ArrayList<Vote>();
 		Vote vote;
 		while (it.hasNext()) {
 			vote = it.next();
-			Date today = DateUtils.truncate(new Date(), Calendar.DATE);
-			if (vote.getDate().before(today))
+			date = DateUtils.truncate(date, Calendar.DATE);
+			if (vote.getDate().before(date))
 				break;
-			else if (DateUtils.isSameDay(vote.getDate(), today)) {
+			else if (DateUtils.isSameDay(vote.getDate(), date)) {
 				votes.add(vote);
 			}				
 		}
@@ -70,6 +69,10 @@ public class Vote implements Comparable<Vote> {
 			return 1;
 		else
 			return -1;
+	}
+	
+	public static void addVote(Vote vote) {
+		Vote.votes.add(vote);
 	}
 
 	@Override
@@ -93,23 +96,23 @@ public class Vote implements Comparable<Vote> {
 		else{
 			Vote other = (Vote) obj;
 		
-			if (date == null) {
+			if (this.date == null) {
 				if (other.date != null)
 					return false;
 				else
 					return true;
 			} 
-			else if (!date.equals(other.date))
+			else if (!this.date.equals(other.date))
 				return false;
-			else if (restaurant == null) {
+			else if (this.restaurant == null) {
 				return false;
 			} 
-			else if (!restaurant.equals(other.restaurant))
+			else if (!this.restaurant.equals(other.restaurant))
 				return false;
-			else if (user == null) {
+			else if (this.user == null) {
 				return false;
 			}
-			else if (!user.equals(other.user))
+			else if (!this.user.equals(other.user))
 				return false;
 			else
 				return true;
