@@ -140,4 +140,8 @@ public class Restaurant {
 				return this.id == other.id;
 		}
 	}
+
+	public static Restaurant getRestaurantById(Integer restaurantId) {
+		return Restaurant.unvisitedRestaurants.get(restaurantId);
+	}
 }

@@ -22,10 +22,9 @@ public class VotingService {
 		this.date = date;
 	}
 	
-	public void vote(String document, String password, Restaurant restaurant) {
-		User user = User.getUserByDoc(document);
-		if ((user != null) && (user.isValidPassword(password)) 
-				&& (!LocalTime.now().isAfter(LocalTime.NOON))) {
+	public boolean vote(User user, Restaurant restaurant) {
+		boolean result = false;
+		if (!LocalTime.now().isAfter(LocalTime.NOON)) {
 			Vote vote = new Vote(restaurant, user, this.date);
 			if ((Vote.getVotesByDate(this.date).contains(vote))
 					|| (!Restaurant.availableRestaurants().containsKey(restaurant.getId()))) {
@@ -35,8 +34,10 @@ public class VotingService {
 				user.addVote(vote);
 				restaurant.addVote(vote);
 				Vote.addVote(vote);
+				result = true;
 			}
 		}
+		return result;
 	}
 	
 	public ArrayList<Restaurant> availableRestaurants(){
