@@ -12,7 +12,25 @@ import java.util.Map;
 import org.apache.commons.lang.time.DateUtils;
 
 public class Restaurant {
+	private static Integer incId = 0;
+	private static Restaurant mostVoted = null;
 	
+	private Integer id;
+	private String name;
+	private List<Vote> votes;
+	
+	public Restaurant(String name) {
+		this.id = getNextId();
+		this.name = name;
+		this.votes = new ArrayList<Vote>(){
+		    public boolean add(Vote vote) {
+		        int index = Collections.binarySearch(this, vote);
+		        if (index < 0) index = ~index;
+		        super.add(index, vote);
+		        return true;
+		    }
+		};
+	}
 	private static final Map<Integer, Restaurant> restaurants = new HashMap<Integer, Restaurant>() {
 		private static final long serialVersionUID = 1L;
 		{
@@ -29,38 +47,22 @@ public class Restaurant {
 	private static Map<Integer, Restaurant> unvisitedRestaurants = new HashMap<Integer, Restaurant>() {
 		private static final long serialVersionUID = 1L;
 		{
-		    	put(1, new Restaurant("Infront"));
-			    put(2, new Restaurant("OrangeFlies"));
-			    put(3, new Restaurant("Lados do Rio"));
-			    put(4, new Restaurant("Xis 86"));
-			    put(5, new Restaurant("Zé do Bar"));
-			    put(6, new Restaurant("GT Café"));
-			    put(7, new Restaurant("Panorama"));
+		    	put(1, restaurants.get(1));
+			    put(2, restaurants.get(2));
+			    put(3, restaurants.get(3));
+			    put(4, restaurants.get(4));
+			    put(5, restaurants.get(5));
+			    put(6, restaurants.get(6));
+			    put(7, restaurants.get(7));
 		}};
 
 	private static Map<Integer, Restaurant> visitedRestaurants = new HashMap<Integer, Restaurant>();
 			
-	private static Integer incId = 0;
-	private static Restaurant mostVoted = null;
-	
-	private Integer id;
-	private String name;
-	private List<Vote> votes;
-	
-	public Restaurant(String name) {
-		this.id = getId();
-		this.name = name;
-		this.votes = new ArrayList<Vote>(){
-		    public boolean add(Vote vote) {
-		        int index = Collections.binarySearch(this, vote);
-		        if (index < 0) index = ~index;
-		        super.add(index, vote);
-		        return true;
-		    }
-		};
+	public Integer getId() {
+		return id;
 	}
 	
-	public Integer getId() {
+	public Integer getNextId() {
 		incId++;
 		return incId;
 	}
@@ -106,10 +108,21 @@ public class Restaurant {
 		return Restaurant.mostVoted;
 	}
 	
-	public static void nextDay() {
+	public static void changeDay() {
 		if (Restaurant.mostVoted != null) {
 			checkRestaurant(Restaurant.mostVoted);
 			Restaurant.mostVoted = null;
+		}
+	}
+	
+	public static void resetOptions() {
+		Restaurant.visitedRestaurants.clear();
+		Iterator<Restaurant> it = Restaurant.restaurants.values().iterator();
+		while (it.hasNext()) {
+			Restaurant restaurant = it.next();
+			if (!Restaurant.unvisitedRestaurants.containsKey(restaurant.getId())) {
+				Restaurant.unvisitedRestaurants.put(restaurant.getId(), restaurant);
+			}
 		}
 	}
 	

@@ -1,20 +1,16 @@
 package models;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.time.DateUtils;
+
 public class User {
 
-	private static final Map<String, User> users = new HashMap<String, User>() {
-		private static final long serialVersionUID = 1L;
-		{
-		    put("1", new User("1", "Marcos", "0"));
-		    put("2", new User("2", "Johnny B. Good", "1"));
-		    put("3", new User("3", "Tom Bombadil", "2"));
-		    put("4", new User("4", "Elodin", "3"));
-		}};
 	
 	private static Integer incId = 0;
 	
@@ -25,20 +21,37 @@ public class User {
 	private List<Vote> votes;
 	
 	public User(String document, String name, String password) {
-		this.id = getId();
+		this.id = getNextId();
 		this.document = document;
 		this.name = name;
 		this.password = password;
-		this.votes = new ArrayList<Vote>();
+		this.votes = new ArrayList<Vote>(){
+		    public boolean add(Vote vote) {
+		        int index = Collections.binarySearch(this, vote);
+		        if (index < 0) index = ~index;
+		        super.add(index, vote);
+		        return true;
+		    }
+		};
 	}
 	
-	public Integer getId() {
+	private static final Map<String, User> users = new HashMap<String, User>() {
+		private static final long serialVersionUID = 1L;
+		{
+		    put("1", new User("1", "Marcos", "1"));
+		    put("2", new User("2", "Johnny B. Good", "2"));
+		    put("3", new User("3", "Tom Bombadil", "3"));
+		    put("4", new User("4", "Elodin", "4"));
+		    put("5", new User("5", "Noé", "5"));
+		}};
+	
+	public Integer getNextId() {
 		incId++;
 		return incId;
 	}
 	
 	public boolean isValidPassword(String password) {
-		return this.password == password;
+		return this.password.equals(password);
 	}
 
 	public HashMap<String, User> getUsers(){
@@ -69,5 +82,9 @@ public class User {
 
 	public static User getUserByDoc(String document) {
 		return User.users.get(document);
+	}
+
+	public boolean hasVoted(Date date) {
+		return (this.votes.size() > 0) && (DateUtils.isSameDay(this.votes.get(0).getDate(), date));
 	}
 }

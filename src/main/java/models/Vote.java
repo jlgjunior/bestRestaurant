@@ -30,7 +30,6 @@ public class Vote implements Comparable<Vote> {
 		this.restaurant = restaurant;
 		this.user = user;
 		this.date = date;
-		votes.add(this);
 	}
 
 	private Integer getId() {

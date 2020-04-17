@@ -1,19 +1,17 @@
 package services;
 
-import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
-import java.util.Map;
 
 import org.apache.commons.lang.time.DateUtils;
-import org.springframework.stereotype.Service;
 
 import models.Restaurant;
 import models.User;
 import models.Vote;
 
-@Service
 public class VotingService {
 
 	private Date date;
@@ -24,7 +22,9 @@ public class VotingService {
 	
 	public boolean vote(User user, Restaurant restaurant) {
 		boolean result = false;
-		if (!LocalTime.now().isAfter(LocalTime.NOON)) {
+		Calendar calendar = GregorianCalendar.getInstance();
+		calendar.setTime(this.date);
+		if (!(calendar.get(Calendar.HOUR_OF_DAY) >= 12) && (!user.hasVoted(this.date))) {
 			Vote vote = new Vote(restaurant, user, this.date);
 			if ((Vote.getVotesByDate(this.date).contains(vote))
 					|| (!Restaurant.availableRestaurants().containsKey(restaurant.getId()))) {
@@ -46,18 +46,30 @@ public class VotingService {
 		Restaurant topVotedRestaurant = Restaurant.getChosenRestaurant();
 		if (topVotedRestaurant != null) {
 			list.add(topVotedRestaurant);
-			while (it.hasNext()) {
-				Restaurant restaurant = it.next();
-				if (restaurant != topVotedRestaurant)
-					list.add(restaurant);
-			}
+		}
+		while (it.hasNext()) {
+			Restaurant restaurant = it.next();
+			if (restaurant != topVotedRestaurant)
+				list.add(restaurant);
 		}
 		
 		return list;	
 	}
 	
-	public void nextDay() {
-		this.date = DateUtils.addDays(this.date, 1);
-		Restaurant.nextDay();
+	public void changeDate(Date date) {
+		Date oldDate = this.date;
+		this.date = date;
+		if (!DateUtils.isSameDay(this.date, oldDate)) {
+			Restaurant.changeDay();
+			Calendar calendar = GregorianCalendar.getInstance();
+			calendar.setTime(this.date);
+			calendar.setMinimalDaysInFirstWeek(7);
+			Integer week = calendar.get(Calendar.WEEK_OF_YEAR);
+			calendar.setTime(oldDate);
+			calendar.setMinimalDaysInFirstWeek(7);
+			if (week != calendar.get(Calendar.WEEK_OF_YEAR)) {
+				Restaurant.resetOptions();
+			}
+		}
 	}
 }
