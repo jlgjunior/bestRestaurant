@@ -1,9 +1,15 @@
 package models;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang.time.DateUtils;
 
 public class Restaurant {
 	
@@ -35,7 +41,7 @@ public class Restaurant {
 	private static Map<Integer, Restaurant> visitedRestaurants = new HashMap<Integer, Restaurant>();
 			
 	private static Integer incId = 0;
-	private static Restaurant chosenOne = null;
+	private static Restaurant mostVoted = null;
 	
 	private Integer id;
 	private String name;
@@ -44,10 +50,17 @@ public class Restaurant {
 	public Restaurant(String name) {
 		this.id = getId();
 		this.name = name;
-		this.votes = new ArrayList<Vote>();
+		this.votes = new ArrayList<Vote>(){
+		    public boolean add(Vote vote) {
+		        int index = Collections.binarySearch(this, vote);
+		        if (index < 0) index = ~index;
+		        super.add(index, vote);
+		        return true;
+		    }
+		};
 	}
 	
-	private Integer getId() {
+	public Integer getId() {
 		incId++;
 		return incId;
 	}
@@ -56,21 +69,49 @@ public class Restaurant {
 		return (HashMap<Integer, Restaurant>) Restaurant.restaurants;
 	}
 	
-	public Integer totalVotes() {
-		return this.votes.size();
+	public Integer totalVotesByDate(Date date) {
+		Integer total = 0;
+		Iterator<Vote> it = this.votes.iterator();
+		Vote vote;
+		while (it.hasNext()) {
+			vote = it.next();
+			date = DateUtils.truncate(date, Calendar.DATE);
+			if (vote.getDate().before(date))
+				break;
+			else if (DateUtils.isSameDay(vote.getDate(), date)) {
+				++total;
+			}				
+		}
+		
+		return total;
 	}
 
 	public void addVote(Vote vote) {
+		Date voteDate = vote.getDate();
 		this.votes.add(vote);
+		if ((Restaurant.mostVoted == null)
+				|| (this.totalVotesByDate(voteDate) > Restaurant.mostVoted.totalVotesByDate(voteDate))) {
+			Restaurant.mostVoted = this;
+		}
 	}
 	
-	public void checkRestaurant(Restaurant restaurant) {
+	private static void checkRestaurant(Restaurant restaurant) {
 		restaurant = Restaurant.unvisitedRestaurants.remove(restaurant.getId());
 		if (restaurant != null) {
 			Restaurant.visitedRestaurants.put(restaurant.getId(), restaurant);
 		}
 	}
 	
+	public static Restaurant getChosenRestaurant() {
+		return Restaurant.mostVoted;
+	}
+	
+	public static void nextDay() {
+		if (Restaurant.mostVoted != null) {
+			checkRestaurant(Restaurant.mostVoted);
+			Restaurant.mostVoted = null;
+		}
+	}
 	
 	public static HashMap<Integer, Restaurant> availableRestaurants() {
 		return (HashMap<Integer, Restaurant>) unvisitedRestaurants;
@@ -78,7 +119,7 @@ public class Restaurant {
 	
 	@Override
 	public String toString() {
-		return "Restaurant [id=" + id + ", name=" + name + ", votes=" + totalVotes() + "]";
+		return "Restaurant [id=" + id + ", name=" + name + "]";
 	}
 	
 
@@ -97,5 +138,6 @@ public class Restaurant {
 				return false;
 			else
 				return this.id == other.id;
+		}
 	}
 }

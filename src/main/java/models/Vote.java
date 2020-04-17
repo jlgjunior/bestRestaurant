@@ -19,17 +19,17 @@ public class Vote implements Comparable<Vote> {
 	    }
 	};
 	private static Integer incId = 0;
-
+	
 	private Integer id;
 	private Restaurant restaurant;
 	private User user;
 	private Date date;
 	
-	public Vote(Restaurant restaurant, User user) {
+	public Vote(Restaurant restaurant, User user, Date date) {
 		this.id = getId();
 		this.restaurant = restaurant;
 		this.user = user;
-		this.date = DateUtils.truncate(new Date(), Calendar.DATE);
+		this.date = date;
 		votes.add(this);
 	}
 
@@ -43,16 +43,16 @@ public class Vote implements Comparable<Vote> {
 		votes.remove(this);
 	}
 	
-	public static ArrayList<Vote> todayVotes(){
+	public static ArrayList<Vote> getVotesByDate(Date date){
 		Iterator<Vote> it = Vote.votes.iterator();
 		ArrayList<Vote> votes = new ArrayList<Vote>();
 		Vote vote;
 		while (it.hasNext()) {
 			vote = it.next();
-			Date today = DateUtils.truncate(new Date(), Calendar.DATE);
-			if (vote.getDate().before(today))
+			date = DateUtils.truncate(date, Calendar.DATE);
+			if (vote.getDate().before(date))
 				break;
-			else if (DateUtils.isSameDay(vote.getDate(), today)) {
+			else if (DateUtils.isSameDay(vote.getDate(), date)) {
 				votes.add(vote);
 			}				
 		}
